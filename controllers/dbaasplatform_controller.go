@@ -113,6 +113,7 @@ func (r *DBaaSPlatformReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 
 	if cr.DeletionTimestamp == nil {
 		platforms = reconcilers.InstallationPlatforms
+
 	}
 
 	nextStatus := cr.Status.DeepCopy()
@@ -126,8 +127,12 @@ func (r *DBaaSPlatformReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 
 			if cr.DeletionTimestamp == nil {
 				status, err = reconciler.Reconcile(ctx, cr, nextStatus)
+				SetPlatformStatusMetric(platform, status)
+				logger.V(1).Info("Finished Setting value to metrics")
 			} else {
 				status, err = reconciler.Cleanup(ctx, cr)
+				CleanPlatformStatusMetric(platform, status)
+				logger.V(1).Info("Finished clearing value to metrics")
 			}
 
 			if err != nil {
